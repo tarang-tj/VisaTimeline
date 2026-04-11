@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VisaTimeline — Never miss an immigration deadline. Get a personalized timeline of every deadline for your visa type, exported straight to your calendar.">
+<meta property="og:title" content="VisaTimeline — Never miss an immigration deadline">
+<meta property="og:description" content="Select your visa type, enter your dates, and get every critical immigration deadline in your calendar. Free, private, no account needed.">
+<meta property="og:type" content="website">
+<title>VisaTimeline — Never miss an immigration deadline</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%234F8CFF'/><stop offset='100%' stop-color='%237C5CFF'/></linearGradient></defs><rect fill='url(%23g)' width='100' height='100' rx='22'/><text x='50' y='68' font-size='52' font-weight='800' text-anchor='middle' fill='%23fff' font-family='system-ui'>VT</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#06080F;
+  --s1:#0C1120;
+  --s2:#111828;
+  --s3:#182035;
+  --card:#141C2E;
+  --border:rgba(79,140,255,0.08);
+  --border-h:rgba(79,140,255,0.22);
+  --border-active:rgba(79,140,255,0.5);
+  --text:#E8ECF8;
+  --text-secondary:#B0BAD4;
+  --muted:#6B7A9E;
+  --faint:#1A2444;
+  --blue:#4F8CFF;
+  --blue-glow:rgba(79,140,255,0.15);
+  --blue-dim:rgba(79,140,255,0.06);
+  --blue-dark:#3A6FD4;
+  --green:#34D67C;
+  --green-dim:rgba(52,214,124,0.1);
+  --orange:#FFB03C;
+  --orange-dim:rgba(255,176,60,0.1);
+  --red:#FF5C5C;
+  --red-dim:rgba(255,92,92,0.1);
+  --purple:#8B6CFF;
+  --purple-dim:rgba(139,108,255,0.08);
+  --gradient:linear-gradient(135deg,#4F8CFF,#7C5CFF);
+  --r:10px;--r-lg:16px;--r-xl:24px;
+  --shadow:0 4px 24px rgba(0,0,0,0.3),0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg:0 8px 40px rgba(0,0,0,0.4),0 2px 8px rgba(0,0,0,0.2);
+}
+
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--text);
+  line-height:1.6;min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ---- ANIMATIONS ---- */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(79,140,255,0.1)}50%{box-shadow:0 0 30px rgba(79,140,255,0.25)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes progressFill{from{width:0}to{width:var(--progress)}}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
+}
+
+.anim-fade-up{animation:fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both}
+.anim-fade-in{animation:fadeIn 0.4s ease both}
+.anim-scale-in{animation:scaleIn 0.4s cubic-bezier(0.16,1,0.3,1) both}
+
+/* ---- BACKGROUND EFFECTS ---- */
+.bg-glow{
+  position:fixed;top:-200px;left:50%;transform:translateX(-50%);
+  width:800px;height:600px;
+  background:radial-gradient(ellipse,rgba(79,140,255,0.06) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+.bg-grid{
+  position:fixed;inset:0;
+  background-image:linear-gradient(rgba(79,140,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(79,140,255,0.02) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0;
+}
+
+/* ---- LAYOUT ---- */
+.container{max-width:840px;margin:0 auto;padding:24px 20px;position:relative;z-index:1}
+
+/* ---- NAV ---- */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;position:sticky;top:0;z-index:100;
+  background:rgba(6,8,15,0.8);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:-0.02em}
+.nav-logo .logo-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--gradient);display:flex;align-items:center;justify-content:center;
+  font-size:0.75rem;font-weight:900;color:#fff;
+}
+.nav-links{display:flex;gap:6px}
+.nav-links a{
+  font-size:0.82rem;color:var(--muted);text-decoration:none;
+  padding:6px 12px;border-radius:8px;transition:all 0.2s;
+}
+.nav-links a:hover{color:var(--text);background:var(--s2)}
+
+/* ---- HERO ---- */
+.hero{text-align:center;padding:80px 20px 60px;position:relative;z-index:1}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 14px 6px 8px;border-radius:50px;
+  background:var(--blue-dim);border:1px solid var(--border-h);
+  font-size:0.78rem;color:var(--blue);font-weight:600;
+  margin-bottom:24px;animation:fadeUp 0.5s ease both;
+}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulseGlow 2s infinite}
+.hero h1{
+  font-size:clamp(2.5rem,6vw,4rem);font-weight:900;
+  letter-spacing:-0.04em;line-height:1.08;margin-bottom:16px;
+  animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+}
+.hero h1 .gradient-text{
+  background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero .subtitle{
+  color:var(--text-secondary);font-size:clamp(1rem,2.5vw,1.2rem);
+  max-width:520px;margin:0 auto 32px;font-weight:400;
+  animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+}
+.hero-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 28px;border-radius:12px;font-size:1rem;font-weight:700;
+  background:var(--gradient);color:#fff;border:none;cursor:pointer;
+  font-family:inherit;transition:all 0.2s;
+  box-shadow:0 4px 20px rgba(79,140,255,0.3);
+  animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.3s both;
+}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(79,140,255,0.4)}
+.hero-cta svg{width:18px;height:18px}
+
+/* ---- TRUST STRIP ---- */
+.trust-strip{
+  display:flex;justify-content:center;gap:32px;flex-wrap:wrap;
+  padding:20px;margin-bottom:40px;
+  animation:fadeUp 0.6s cubic-bezier(0.16,1,0.3,1) 0.4s both;
+}
+.trust-item{display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--muted)}
+.trust-item .ti-icon{font-size:1rem}
+
+/* ---- PROGRESS BAR (top of steps) ---- */
+.progress-wrap{
+  background:var(--s1);border-radius:20px;height:6px;margin-bottom:32px;overflow:hidden;
+  border:1px solid var(--border);
+}
+.progress-bar{
+  height:100%;border-radius:20px;background:var(--gradient);
+  transition:width 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ---- LEGAL BANNER ---- */
+.legal-banner{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:14px 18px;margin-bottom:28px;
+  display:flex;gap:12px;align-items:flex-start;
+  animation:fadeIn 0.5s ease 0.3s both;
+}
+.legal-banner .lb-icon{
+  width:32px;height:32px;border-radius:8px;background:var(--blue-dim);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-size:0.9rem;
+}
+.legal-banner p{font-size:0.78rem;color:var(--muted);line-height:1.6}
+.legal-banner strong{color:var(--text-secondary)}
+.legal-banner a{color:var(--blue);text-decoration:none}
+.legal-banner a:hover{text-decoration:underline}
+
+/* ---- STEP LABEL ---- */
+.step-label{
+  font-size:0.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.1em;color:var(--blue);margin-bottom:8px;
+}
+
+/* ---- CARDS ---- */
+.card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:var(--r-xl);padding:36px;margin-bottom:24px;
+  box-shadow:var(--shadow);
+}
+.card h2{font-size:1.5rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.02em}
+.card .subtitle{color:var(--muted);font-size:0.9rem;margin-bottom:28px}
+
+/* ---- FORMS ---- */
+label{display:block;font-size:0.8rem;font-weight:600;margin-bottom:6px;color:var(--text-secondary);letter-spacing:0.02em}
+select,input[type="date"],input[type="text"],input[type="email"]{
+  width:100%;padding:13px 16px;font-size:0.92rem;font-family:inherit;
+  background:var(--s2);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--r);
+  outline:none;transition:all 0.2s;
+}
+select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236B7A9E'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;
+  padding-right:40px;cursor:pointer;
+}
+select:focus,input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-glow)}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.7)}
+.form-group{margin-bottom:20px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:540px){.form-row{grid-template-columns:1fr}}
+
+/* ---- VISA GRID ---- */
+.visa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:8px}
+.visa-option{
+  padding:20px;border-radius:var(--r-lg);position:relative;overflow:hidden;
+  border:1px solid var(--border);background:var(--s2);
+  cursor:pointer;transition:all 0.25s cubic-bezier(0.16,1,0.3,1);
+  text-align:left;color:var(--text);font-family:inherit;
+}
+.visa-option::before{
+  content:'';position:absolute;inset:0;opacity:0;
+  background:linear-gradient(135deg,rgba(79,140,255,0.05),rgba(124,92,255,0.05));
+  transition:opacity 0.25s;
+}
+.visa-option:hover{border-color:var(--border-h);transform:translateY(-2px);box-shadow:var(--shadow)}
+.visa-option:hover::before{opacity:1}
+.visa-option.selected{
+  border-color:var(--border-active);background:var(--blue-dim);
+  box-shadow:0 0 30px rgba(79,140,255,0.1),var(--shadow);
+}
+.visa-option.selected::before{opacity:1}
+.visa-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:12px;font-size:1.2rem;
+}
+.visa-name{font-weight:700;font-size:1.05rem;margin-bottom:4px;position:relative}
+.visa-desc{font-size:0.78rem;color:var(--muted);line-height:1.45;position:relative}
+.visa-check{
+  position:absolute;top:16px;right:16px;width:22px;height:22px;
+  border-radius:50%;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.25s;font-size:0.7rem;color:transparent;
+}
+.visa-option.selected .visa-check{
+  background:var(--blue);border-color:var(--blue);color:#fff;
+}
+
+/* ---- BUTTONS ---- */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 24px;border-radius:var(--r);font-size:0.92rem;font-weight:600;
+  font-family:inherit;cursor:pointer;border:none;transition:all 0.2s;
+  position:relative;overflow:hidden;
+}
+.btn-primary{background:var(--gradient);color:#fff;box-shadow:0 2px 12px rgba(79,140,255,0.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(79,140,255,0.35)}
+.btn-primary:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-secondary{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--border-h);background:var(--s3)}
+.btn-ghost{background:transparent;color:var(--muted);padding:12px 16px}
+.btn-ghost:hover{color:var(--text)}
+.btn-row{display:flex;gap:12px;justify-content:space-between;margin-top:28px;flex-wrap:wrap}
+.btn svg{width:16px;height:16px}
+.btn-icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center}
+
+/* ---- TIMELINE ---- */
+.timeline{position:relative;padding-left:32px;margin:8px 0}
+.timeline::before{
+  content:'';position:absolute;left:9px;top:12px;bottom:12px;
+  width:2px;background:linear-gradient(180deg,var(--blue) 0%,var(--purple) 100%);
+  border-radius:2px;opacity:0.3;
+}
+.tl-item{
+  position:relative;margin-bottom:28px;padding:18px 20px;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:var(--r-lg);transition:all 0.2s;
+}
+.tl-item:hover{border-color:var(--border-h);transform:translateX(4px)}
+.tl-dot{
+  position:absolute;left:-29px;top:24px;
+  width:14px;height:14px;border-radius:50%;border:3px solid var(--blue);
+  background:var(--bg);z-index:2;transition:all 0.2s;
+}
+.tl-item.urgent .tl-dot{border-color:var(--red);box-shadow:0 0 10px rgba(255,92,92,0.3)}
+.tl-item.warning .tl-dot{border-color:var(--orange);box-shadow:0 0 10px rgba(255,176,60,0.3)}
+.tl-item.info .tl-dot{border-color:var(--green);box-shadow:0 0 10px rgba(52,214,124,0.3)}
+
+.tl-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.tl-date{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em}
+.tl-item.urgent .tl-date{color:var(--red)}
+.tl-item.warning .tl-date{color:var(--orange)}
+.tl-item.info .tl-date{color:var(--green)}
+.tl-item:not(.urgent):not(.warning):not(.info) .tl-date{color:var(--blue)}
+
+.tl-tag{
+  font-size:0.65rem;font-weight:700;padding:3px 10px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:0.06em;
+}
+.tl-tag.critical{background:var(--red-dim);color:var(--red)}
+.tl-tag.important{background:var(--orange-dim);color:var(--orange)}
+.tl-tag.routine{background:var(--green-dim);color:var(--green)}
+
+.tl-title{font-weight:700;font-size:1.05rem;margin-bottom:4px}
+.tl-desc{font-size:0.84rem;color:var(--muted);line-height:1.6}
+
+/* ---- COUNTDOWN ---- */
+.tl-countdown{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:0.72rem;font-weight:600;color:var(--text-secondary);
+  margin-top:8px;padding:4px 10px;border-radius:6px;
+  background:var(--s1);
+}
+
+/* ---- STATS ROW ---- */
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;
+}
+.stat-card{
+  background:var(--s2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:16px 18px;text-align:center;
+}
+.stat-num{font-size:1.6rem;font-weight:800;letter-spacing:-0.02em}
+.stat-num.red{color:var(--red)}
+.stat-num.orange{color:var(--orange)}
+.stat-num.green{color:var(--green)}
+.stat-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px}
+@media(max-width:480px){.stats-row{grid-template-columns:1fr}}
+
+/* ---- EXPORT SECTION ---- */
+.export-section{
+  margin-top:36px;padding-top:28px;border-top:1px solid var(--border);
+}
+.export-section h3{font-size:1rem;font-weight:700;margin-bottom:4px}
+.export-section .subtitle{font-size:0.82rem;color:var(--muted);margin-bottom:16px}
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.export-btn{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:20px;border-radius:var(--r-lg);
+  background:var(--s2);border:1px solid var(--border);
+  cursor:pointer;transition:all 0.2s;
+  color:var(--text);font-family:inherit;text-align:center;
+}
+.export-btn:hover{border-color:var(--border-h);transform:translateY(-2px);box-shadow:var(--shadow)}
+.export-btn .eb-icon{font-size:1.5rem}
+.export-btn .eb-title{font-weight:700;font-size:0.92rem}
+.export-btn .eb-desc{font-size:0.72rem;color:var(--muted)}
+@media(max-width:480px){.export-grid{grid-template-columns:1fr}}
+
+/* ---- SHARE / PRINT ---- */
+.action-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+
+/* ---- REMINDER SIGNUP ---- */
+.reminder-box{
+  margin-top:28px;padding:24px;border-radius:var(--r-lg);
+  background:var(--purple-dim);border:1px solid rgba(139,108,255,0.15);
+}
+.reminder-box h3{font-size:0.95rem;font-weight:700;margin-bottom:4px;color:var(--text)}
+.reminder-box p{font-size:0.82rem;color:var(--muted);margin-bottom:14px}
+.reminder-form{display:flex;gap:10px}
+.reminder-form input{flex:1;min-width:0}
+@media(max-width:480px){.reminder-form{flex-direction:column}}
+
+/* ---- LEGAL REMINDER IN RESULTS ---- */
+.legal-reminder{
+  margin-top:24px;padding:16px 18px;border-radius:var(--r);
+  background:var(--blue-dim);border:1px solid var(--border-h);
+  font-size:0.8rem;color:var(--muted);line-height:1.6;
+}
+.legal-reminder strong{color:var(--text-secondary)}
+.legal-reminder a{color:var(--blue);text-decoration:none}
+
+/* ---- HIDDEN ---- */
+.hidden{display:none!important}
+
+/* ---- FOOTER ---- */
+footer{
+  text-align:center;padding:48px 20px;color:var(--muted);font-size:0.75rem;
+  line-height:1.8;border-top:1px solid var(--border);margin-top:40px;
+  position:relative;z-index:1;
+}
+footer a{color:var(--blue);text-decoration:none}
+footer a:hover{text-decoration:underline}
+footer .footer-links{display:flex;gap:16px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+footer .footer-links a{color:var(--muted);font-size:0.78rem}
+
+/* ---- TOAST ---- */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--card);border:1px solid var(--border-h);
+  padding:14px 22px;border-radius:var(--r-lg);font-size:0.88rem;font-weight:500;
+  box-shadow:var(--shadow-lg);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  z-index:999;display:flex;align-items:center;gap:10px;
+  backdrop-filter:blur(12px);
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ---- MODAL ---- */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(4px);animation:fadeIn 0.2s ease;
+}
+.modal{
+  background:var(--s1);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:36px;max-width:620px;width:100%;max-height:80vh;overflow-y:auto;
+  box-shadow:var(--shadow-lg);animation:scaleIn 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.modal h2{font-size:1.2rem;font-weight:800;margin-bottom:16px;letter-spacing:-0.01em}
+.modal p{font-size:0.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:12px}
+.modal strong{color:var(--text)}
+.modal a{color:var(--blue)}
+
+/* ---- PRINT STYLES ---- */
+@media print{
+  body{background:#fff;color:#000}
+  nav,.hero,.legal-banner,.export-section,.action-row,.reminder-box,.trust-strip,.progress-wrap,.toast,footer,.btn-row,.bg-glow,.bg-grid{display:none!important}
+  .card{box-shadow:none;border:1px solid #ddd;padding:20px;break-inside:avoid}
+  .tl-item{background:#f9f9f9;border:1px solid #ddd;color:#000}
+  .tl-desc{color:#444}
+  .tl-title{color:#000}
+  .stats-row{display:none}
+  .timeline::before{background:#ccc}
+  .legal-reminder{background:#f0f4ff;border:1px solid #ccc;color:#444}
+  .legal-reminder strong{color:#000}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
+
+<nav>
+  <div class="nav-logo">
+    <div class="logo-icon">VT</div>
+    VisaTimeline
+  </div>
+  <div class="nav-links">
+    <a href="#" onclick="showDisclaimer();return false">Disclaimer</a>
+    <a href="#" onclick="showPrivacy();return false">Privacy</a>
+    <a href="#" onclick="showTerms();return false">Terms</a>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<div class="hero" id="hero-section">
+  <div class="hero-badge"><span class="dot"></span> Free &middot; Private &middot; No account needed</div>
+  <h1>Never miss an<br><span class="gradient-text">immigration deadline</span></h1>
+  <p class="subtitle">Select your visa type, enter your dates, and get a personalized calendar of every critical deadline you need to hit.</p>
+  <button class="hero-cta" onclick="startFlow()">
+    Get Your Timeline
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </button>
+</div>
+
+<div class="trust-strip" id="trust-strip">
+  <div class="trust-item"><span class="ti-icon">&#128274;</span> 100% client-side — zero data sent to servers</div>
+  <div class="trust-item"><span class="ti-icon">&#9201;</span> Takes less than 2 minutes</div>
+  <div class="trust-item"><span class="ti-icon">&#128197;</span> Export to Google Calendar, Apple, Outlook</div>
+</div>
+
+<div class="container" id="app-container" class="hidden">
+  <!-- Legal Banner -->
+  <div class="legal-banner hidden" id="legal-banner">
+    <div class="lb-icon">&#9432;</div>
+    <p><strong>Important:</strong> VisaTimeline provides general, publicly available immigration timeline information to help you stay organized. This is <strong>not legal advice</strong> and does not create an attorney-client relationship. Always verify with <a href="https://www.uscis.gov" target="_blank" rel="noopener">USCIS.gov</a> and consult a licensed immigration attorney for legal guidance.</p>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-wrap hidden" id="progress-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:33%"></div>
+  </div>
+
+  <!-- STEP 1: Select Visa Type -->
+  <div id="step-0" class="hidden">
+    <div class="card anim-fade-up">
+      <div class="step-label">Step 1 of 3</div>
+      <h2>Select your visa type</h2>
+      <p class="subtitle">Choose the category that best matches your current immigration status</p>
+      <div class="visa-grid" id="visa-grid"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Enter Dates -->
+  <div id="step-1" class="hidden">
+    <div class="card anim-fade-up">
+      <div class="step-label">Step 2 of 3</div>
+      <h2 id="dates-title">Enter your key dates</h2>
+      <p class="subtitle" id="dates-subtitle">We'll use these to calculate your personalized deadline timeline</p>
+      <div id="dates-form"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goToStep(0)">&larr; Back</button>
+        <button class="btn btn-primary" id="generate-btn" onclick="generateTimeline()">
+          Generate Timeline
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Results -->
+  <div id="step-2" class="hidden">
+    <div class="card anim-scale-in">
+      <div class="step-label">Your Results</div>
+      <h2 id="results-title">Your Immigration Timeline</h2>
+      <p class="subtitle" id="results-subtitle"></p>
+
+      <div class="stats-row" id="stats-row"></div>
+
+      <div class="timeline" id="timeline"></div>
+
+      <!-- Export Section -->
+      <div class="export-section">
+        <h3>Export your deadlines</h3>
+        <p class="subtitle">Add these to the calendar you already use</p>
+        <div class="export-grid">
+          <button class="export-btn" onclick="exportICS()">
+            <span class="eb-icon">&#128197;</span>
+            <span class="eb-title">Download .ics File</span>
+            <span class="eb-desc">Works with Apple Calendar, Outlook, and more</span>
+          </button>
+          <button class="export-btn" onclick="exportGoogle()">
+            <span class="eb-icon">&#127760;</span>
+            <span class="eb-title">Google Calendar</span>
+            <span class="eb-desc">Open directly in Google Calendar</span>
+          </button>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-secondary" onclick="window.print()">&#128424; Print Timeline</button>
+          <button class="btn btn-secondary" onclick="copyLink()">&#128279; Share Link</button>
+          <button class="btn btn-ghost" onclick="startFlow()">&larr; Start Over</button>
+        </div>
+      </div>
+
+      <!-- Reminder Signup -->
+      <div class="reminder-box">
+        <h3>Get deadline reminders</h3>
+        <p>We'll send you an email reminder 30 days and 7 days before each critical deadline. No spam, ever.</p>
+        <div class="reminder-form">
+          <input type="email" id="reminder-email" placeholder="your@email.com">
+          <button class="btn btn-primary" onclick="signupReminder()">Set Reminders</button>
+        </div>
+      </div>
+
+      <!-- Legal Reminder -->
+      <div class="legal-reminder">
+        <strong>Reminder:</strong> These deadlines are based on general USCIS published timelines and your provided dates. Processing times vary by case. Always verify current deadlines at <a href="https://www.uscis.gov" target="_blank" rel="noopener">USCIS.gov</a> and consult a licensed immigration attorney for advice specific to your situation. This tool does not provide legal advice.
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2026 VisaTimeline. All rights reserved.</p>
+  <p>This tool provides <strong>general immigration deadline information only</strong> based on publicly available USCIS guidelines.<br>It is <strong>not legal advice</strong> and does not replace consultation with a licensed immigration attorney.<br>No attorney-client relationship is created by using this tool.</p>
+  <div class="footer-links">
+    <a href="#" onclick="showDisclaimer();return false">Full Disclaimer</a>
+    <a href="#" onclick="showPrivacy();return false">Privacy Policy</a>
+    <a href="#" onclick="showTerms();return false">Terms of Service</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =========================================================
+// VISA DATA — All publicly available USCIS information
+// =========================================================
+const VISA_TYPES = [
+  {
+    id:'f1', name:'F-1 Student', icon:'&#127891;', iconBg:'var(--blue-dim)',
+    desc:'Full-time academic students at SEVP-certified schools',
+    fields:[
+      {id:'program_end',label:'Program End Date (on I-20)',type:'date'},
+      {id:'graduation',label:'Expected Graduation Date',type:'date'},
+    ],
+    deadlines:(d)=>{
+      const pe=new Date(d.program_end),gr=new Date(d.graduation),items=[];
+      items.push({date:addDays(pe,-90),title:'OPT Application Window Opens',desc:'You may file Form I-765 for Optional Practical Training up to 90 days before your program end date.',priority:'important'});
+      items.push({date:addDays(pe,60),title:'OPT Application Deadline',desc:'Last day to file your OPT application (I-765). Must be received by USCIS within 60 days of program end date.',priority:'critical'});
+      items.push({date:pe,title:'Program End Date',desc:'Your academic program officially ends on this date as listed on your I-20.',priority:'critical'});
+      items.push({date:addDays(pe,60),title:'60-Day Grace Period Ends',desc:'You have 60 days after program completion to depart the U.S., transfer to another school, or change status.',priority:'critical'});
+      const optExp=addDays(pe,365);
+      items.push({date:addDays(optExp,-90),title:'STEM OPT Extension Window (if eligible)',desc:'If your degree is STEM-eligible, apply for the 24-month STEM OPT extension up to 90 days before initial OPT expires. Requires updated I-20 and Form I-765.',priority:'important'});
+      items.push({date:optExp,title:'Initial OPT Expires (approx.)',desc:'Your 12-month OPT ends approximately one year after program completion. Apply for STEM extension or change status before this date.',priority:'critical'});
+      items.push({date:addDays(gr,-180),title:'Check I-20 Travel Signature',desc:'If traveling internationally, your I-20 must have a travel signature less than 6 months old for re-entry. Visit your DSO.',priority:'routine'});
+      const yr=new Date().getFullYear(),sep1=new Date(yr,8,1);
+      if(sep1>new Date())items.push({date:sep1,title:'Confirm SEVIS Registration',desc:'At the start of each academic year, confirm your enrollment is registered in SEVIS through your DSO.',priority:'routine'});
+      return items;
+    }
+  },
+  {
+    id:'opt', name:'OPT / STEM OPT', icon:'&#128188;', iconBg:'var(--green-dim)',
+    desc:'Currently on post-completion Optional Practical Training',
+    fields:[
+      {id:'opt_start',label:'OPT Start Date (on EAD card)',type:'date'},
+      {id:'opt_end',label:'OPT End Date (on EAD card)',type:'date'},
+      {id:'is_stem',label:'Is your degree STEM-eligible?',type:'select',options:['Yes','No','Not sure']},
+    ],
+    deadlines:(d)=>{
+      const s=new Date(d.opt_start),e=new Date(d.opt_end),stem=d.is_stem==='Yes',items=[];
+      items.push({date:addDays(s,1),title:'Unemployment Tracking Begins',desc:'On initial OPT, you may not accumulate more than 90 days of unemployment. On STEM OPT, the limit is 150 days total.',priority:'important'});
+      items.push({date:addDays(s,14),title:'Report Employer to DSO',desc:'Report your employer name and address to your DSO within 10 days of starting employment. Update whenever employer changes.',priority:'important'});
+      if(stem||d.is_stem==='Not sure'){
+        items.push({date:addDays(e,-90),title:'STEM OPT Extension Window Opens',desc:'Apply for the 24-month STEM extension up to 90 days before current OPT expires. Need new I-20 from DSO and Form I-765.',priority:'critical'});
+      }
+      items.push({date:e,title:'OPT Expiration Date',desc:'Employment authorization ends. If no extension or status change is pending, you enter a 60-day grace period.',priority:'critical'});
+      items.push({date:addDays(e,60),title:'60-Day Grace Period Ends',desc:'Depart the U.S., transfer, or change status by this date.',priority:'critical'});
+      const now=new Date();let yr=now.getFullYear();if(now.getMonth()>2)yr++;
+      items.push({date:new Date(yr,2,1),title:'H-1B Cap Registration Opens (approx.)',desc:'Annual H-1B cap registration typically opens early March. Coordinate with your employer well in advance if they plan to sponsor.',priority:'important'});
+      items.push({date:addDays(s,1),title:'Validate E-Verify Employer (STEM OPT)',desc:'For STEM OPT, your employer must be enrolled in E-Verify. Confirm this before starting work. This is a USCIS requirement for STEM extension eligibility.',priority:'routine'});
+      return items;
+    }
+  },
+  {
+    id:'h1b', name:'H-1B Worker', icon:'&#128188;', iconBg:'var(--purple-dim)',
+    desc:'Employer-sponsored specialty occupation visa',
+    fields:[
+      {id:'h1b_start',label:'H-1B Start Date',type:'date'},
+      {id:'h1b_end',label:'H-1B End Date',type:'date'},
+      {id:'has_gc',label:'Green card process started?',type:'select',options:['Yes','No','Not sure']},
+    ],
+    deadlines:(d)=>{
+      const s=new Date(d.h1b_start),e=new Date(d.h1b_end),items=[];
+      items.push({date:addDays(s,10),title:'File AR-11 (Address Reporting)',desc:'Report your U.S. address to USCIS within 10 days using Form AR-11. Required for all nonimmigrants after address change.',priority:'routine'});
+      items.push({date:addDays(s,30),title:'Verify I-94 Record',desc:'Check i94.cbp.dhs.gov to confirm admission date, class, and authorized stay match your H-1B approval.',priority:'routine'});
+      items.push({date:addDays(e,-180),title:'Begin H-1B Extension Process',desc:'Your employer should file extension petition (I-129) at least 6 months before expiration. You can continue working while pending (240-day rule).',priority:'important'});
+      items.push({date:e,title:'H-1B Period Expires',desc:'Current H-1B authorization ends. If no extension or change of status is pending, you must depart.',priority:'critical'});
+      const sixYr=addDays(s,365*6);
+      items.push({date:addDays(sixYr,-365),title:'1 Year to 6-Year H-1B Maximum',desc:'H-1B is generally limited to 6 years total. Extensions beyond 6 years possible if green card petition (I-140) is approved or pending. Consult an immigration attorney.',priority:'important'});
+      if(d.has_gc==='No'){
+        items.push({date:addDays(s,365),title:'Evaluate Green Card Timeline',desc:'PERM, I-140, and I-485 can take years. Starting early gives flexibility before the 6-year H-1B limit.',priority:'important'});
+      }
+      items.push({date:addDays(e,60),title:'60-Day Grace Period Ends (if applicable)',desc:'If your H-1B ends and is not extended, you generally have up to 60 days to depart or change status.',priority:'critical'});
+      return items;
+    }
+  },
+  {
+    id:'j1', name:'J-1 Exchange Visitor', icon:'&#127758;', iconBg:'var(--orange-dim)',
+    desc:'Exchange students, scholars, trainees, interns',
+    fields:[
+      {id:'j1_start',label:'Program Start Date (on DS-2019)',type:'date'},
+      {id:'j1_end',label:'Program End Date (on DS-2019)',type:'date'},
+      {id:'j1_category',label:'J-1 Category',type:'select',options:['Student','Research Scholar','Short-Term Scholar','Intern','Trainee','Other']},
+    ],
+    deadlines:(d)=>{
+      const s=new Date(d.j1_start),e=new Date(d.j1_end),items=[];
+      items.push({date:e,title:'J-1 Program End Date',desc:'Your authorized J-1 program ends. Employment authorization ceases.',priority:'critical'});
+      items.push({date:addDays(e,30),title:'30-Day Grace Period Ends',desc:'J-1 visitors have a 30-day grace period to depart or change status. No work permitted during this period.',priority:'critical'});
+      if(d.j1_category==='Student'){
+        items.push({date:addDays(e,-60),title:'Apply for Academic Training',desc:'J-1 students may be eligible for Academic Training (similar to OPT). Apply through your program sponsor before program ends.',priority:'important'});
+      }
+      items.push({date:addDays(e,-90),title:'Check 212(e) Home Residency Requirement',desc:'Some J-1 visitors must reside in their home country for 2 years before changing to H, L, or K status. Check your DS-2019 notation. Consult an attorney about waiver options if applicable.',priority:'important'});
+      items.push({date:addDays(s,1),title:'Verify DS-2019 Travel Signature',desc:'DS-2019 must have a valid travel signature for re-entry. Generally valid 12 months. Get signed before international travel.',priority:'routine'});
+      items.push({date:addDays(s,1),title:'Confirm Health Insurance Compliance',desc:'J-1 visitors must maintain health insurance meeting minimum coverage requirements throughout the program.',priority:'routine'});
+      return items;
+    }
+  },
+  {
+    id:'h4', name:'H-4 Dependent', icon:'&#128106;', iconBg:'var(--green-dim)',
+    desc:'Spouse or child of H-1B visa holder',
+    fields:[
+      {id:'h1b_exp',label:"Primary H-1B Holder's Visa Expiration",type:'date'},
+      {id:'has_ead',label:'Do you have an H-4 EAD?',type:'select',options:['Yes','No']},
+    ],
+    deadlines:(d)=>{
+      const exp=new Date(d.h1b_exp),items=[];
+      items.push({date:addDays(exp,-180),title:"Coordinate H-4 Extension with H-1B",desc:"Your H-4 status is tied to the primary H-1B holder's status. When they file for extension, include your H-4 extension (I-539).",priority:'important'});
+      items.push({date:exp,title:'H-4 Status Expires (with H-1B)',desc:"Your H-4 status expires when the primary holder's H-1B expires. Ensure extension is filed.",priority:'critical'});
+      if(d.has_ead==='Yes'){
+        items.push({date:addDays(exp,-180),title:'Renew H-4 EAD Before Expiration',desc:'H-4 EAD must be renewed. File Form I-765 well in advance as processing times vary. You cannot work with an expired EAD.',priority:'critical'});
+      }
+      items.push({date:addDays(exp,-30),title:'Verify I-94 Status',desc:'Check i94.cbp.dhs.gov to confirm your status matches your H-4 approval notice.',priority:'routine'});
+      return items;
+    }
+  },
+  {
+    id:'l1', name:'L-1 Intracompany Transfer', icon:'&#127970;', iconBg:'var(--blue-dim)',
+    desc:'Intracompany transferees (managers, executives, specialized knowledge)',
+    fields:[
+      {id:'l1_start',label:'L-1 Start Date',type:'date'},
+      {id:'l1_end',label:'L-1 End Date',type:'date'},
+      {id:'l1_type',label:'L-1 Category',type:'select',options:['L-1A (Manager/Executive)','L-1B (Specialized Knowledge)']},
+    ],
+    deadlines:(d)=>{
+      const s=new Date(d.l1_start),e=new Date(d.l1_end),items=[];
+      const maxYears=d.l1_type.includes('L-1A')?7:5;
+      const maxDate=addDays(s,365*maxYears);
+      items.push({date:addDays(e,-180),title:'Begin L-1 Extension Process',desc:'File I-129 for extension at least 6 months before expiration. 240-day rule allows continued work while pending.',priority:'important'});
+      items.push({date:e,title:'L-1 Period Expires',desc:'Current L-1 authorization ends. Must have extension pending or depart.',priority:'critical'});
+      items.push({date:addDays(maxDate,-365),title:`1 Year to ${maxYears}-Year L-1 Maximum`,desc:`L-1${d.l1_type.includes('L-1A')?'A':'B'} is limited to ${maxYears} years total. Plan for green card or status change well in advance.`,priority:'important'});
+      items.push({date:addDays(s,10),title:'File AR-11 (Address Report)',desc:'Report U.S. address within 10 days using Form AR-11.',priority:'routine'});
+      items.push({date:addDays(e,60),title:'60-Day Grace Period Ends',desc:'If not extended, you have up to 60 days to depart or change status after L-1 ends.',priority:'critical'});
+      return items;
+    }
+  },
+  {
+    id:'o1', name:'O-1 Extraordinary Ability', icon:'&#11088;', iconBg:'var(--orange-dim)',
+    desc:'Individuals with extraordinary ability or achievement',
+    fields:[
+      {id:'o1_start',label:'O-1 Start Date',type:'date'},
+      {id:'o1_end',label:'O-1 End Date',type:'date'},
+    ],
+    deadlines:(d)=>{
+      const s=new Date(d.o1_start),e=new Date(d.o1_end),items=[];
+      items.push({date:addDays(e,-180),title:'Begin O-1 Extension Filing',desc:'File I-129 for extension at least 6 months before expiration. O-1 can be extended in 1-year increments with no maximum limit.',priority:'important'});
+      items.push({date:e,title:'O-1 Period Expires',desc:'Current O-1 authorization ends. O-1 has no maximum stay limit but must be extended before expiration.',priority:'critical'});
+      items.push({date:addDays(e,60),title:'60-Day Grace Period Ends',desc:'If not extended, depart or change status within 60 days.',priority:'critical'});
+      items.push({date:addDays(s,10),title:'File AR-11 (Address Report)',desc:'Report U.S. address within 10 days using Form AR-11.',priority:'routine'});
+      items.push({date:addDays(s,30),title:'Verify I-94 Record',desc:'Check i94.cbp.dhs.gov to confirm your admission matches your O-1 approval.',priority:'routine'});
+      return items;
+    }
+  },
+  {
+    id:'tn', name:'TN (USMCA)', icon:'&#127464;&#127462;', iconBg:'var(--red-dim)',
+    desc:'Canadian and Mexican professionals under USMCA treaty',
+    fields:[
+      {id:'tn_start',label:'TN Start Date',type:'date'},
+      {id:'tn_end',label:'TN End Date (I-94)',type:'date'},
+    ],
+    deadlines:(d)=>{
+      const s=new Date(d.tn_start),e=new Date(d.tn_end),items=[];
+      items.push({date:addDays(e,-180),title:'Plan TN Renewal',desc:'TN status is granted in up to 3-year increments with no maximum. Renewal can be done by re-application at the border, mail (I-129), or at a consulate.',priority:'important'});
+      items.push({date:e,title:'TN Status Expires',desc:'Your authorized TN period ends. Must renew or depart.',priority:'critical'});
+      items.push({date:addDays(e,60),title:'60-Day Grace Period Ends',desc:'If not renewed, depart or change status within 60 days.',priority:'critical'});
+      items.push({date:addDays(s,10),title:'File AR-11 (Address Report)',desc:'Report U.S. address within 10 days using Form AR-11.',priority:'routine'});
+      return items;
+    }
+  },
+  {
+    id:'b1b2', name:'B-1/B-2 Visitor', icon:'&#9992;&#65039;', iconBg:'var(--blue-dim)',
+    desc:'Business visitors or tourists',
+    fields:[
+      {id:'entry_date',label:'Date of Entry to the U.S.',type:'date'},
+      {id:'i94_expiry',label:'I-94 Expiration Date',type:'date'},
+    ],
+    deadlines:(d)=>{
+      const entry=new Date(d.entry_date),exp=new Date(d.i94_expiry),items=[];
+      items.push({date:addDays(entry,3),title:'Verify I-94 Record',desc:'Check i94.cbp.dhs.gov within a few days of entry. Confirm admission date, class (B-1/B-2), and "Admit Until" date are correct.',priority:'routine'});
+      items.push({date:addDays(entry,10),title:'Report Address (AR-11)',desc:'Report U.S. address to USCIS within 10 days using Form AR-11.',priority:'routine'});
+      items.push({date:addDays(exp,-45),title:'Extension Filing Deadline (recommended)',desc:'If you need more time, file Form I-539 at least 45 days before I-94 expiration.',priority:'important'});
+      items.push({date:exp,title:'Authorized Stay Expires',desc:'You must depart by this date unless an extension is filed and pending. Overstaying can result in bars to future admission.',priority:'critical'});
+      return items;
+    }
+  },
+];
+
+// =========================================================
+// STATE
+// =========================================================
+let currentStep=-1;
+let selectedVisa=null;
+let timelineData=[];
+
+// =========================================================
+// HELPERS
+// =========================================================
+function addDays(date,days){const d=new Date(date);d.setDate(d.getDate()+days);return d}
+function fmt(date){return date.toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'long',day:'numeric'})}
+function fmtICS(date){const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');return`${y}${m}${d}`}
+function daysUntil(date){return Math.ceil((date-new Date())/(1000*60*60*24))}
+
+function toast(msg,icon=''){
+  const el=document.getElementById('toast');
+  el.innerHTML=icon?`<span>${icon}</span> ${msg}`:msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// =========================================================
+// FLOW CONTROL
+// =========================================================
+function startFlow(){
+  document.getElementById('hero-section').classList.add('hidden');
+  document.getElementById('trust-strip').classList.add('hidden');
+  document.getElementById('legal-banner').classList.remove('hidden');
+  document.getElementById('progress-wrap').classList.remove('hidden');
+  goToStep(0);
+}
+
+function goToStep(step){
+  if(step===1&&!selectedVisa)return;
+  currentStep=step;
+  [0,1,2].forEach(i=>{
+    document.getElementById(`step-${i}`).classList.toggle('hidden',i!==step);
+  });
+  const pct=step===0?'33%':step===1?'66%':'100%';
+  document.getElementById('progress-bar').style.width=pct;
+  if(step===1)renderDatesForm();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// =========================================================
+// RENDER
+// =========================================================
+function renderVisaGrid(){
+  const grid=document.getElementById('visa-grid');
+  grid.innerHTML=VISA_TYPES.map(v=>`
+    <button class="visa-option" data-id="${v.id}" onclick="selectVisa('${v.id}')">
+      <div class="visa-icon" style="background:${v.iconBg}">${v.icon}</div>
+      <div class="visa-check">&#10003;</div>
+      <div class="visa-name">${v.name}</div>
+      <div class="visa-desc">${v.desc}</div>
+    </button>
+  `).join('');
+}
+
+function selectVisa(id){
+  selectedVisa=VISA_TYPES.find(v=>v.id===id);
+  document.querySelectorAll('.visa-option').forEach(el=>{
+    el.classList.toggle('selected',el.dataset.id===id);
+  });
+  setTimeout(()=>goToStep(1),250);
+}
+
+function renderDatesForm(){
+  if(!selectedVisa)return;
+  const form=document.getElementById('dates-form');
+  document.getElementById('dates-title').textContent=`Enter your ${selectedVisa.name} dates`;
+  document.getElementById('dates-subtitle').textContent="We'll calculate your personalized deadline timeline from these dates";
+  form.innerHTML=selectedVisa.fields.map(f=>{
+    if(f.type==='select'){
+      return`<div class="form-group"><label for="${f.id}">${f.label}</label><select id="${f.id}">${f.options.map(o=>`<option value="${o}">${o}</option>`).join('')}</select></div>`;
+    }
+    return`<div class="form-group"><label for="${f.id}">${f.label}</label><input type="${f.type}" id="${f.id}"></div>`;
+  }).join('');
+}
+
+function generateTimeline(){
+  if(!selectedVisa)return;
+  const data={};
+  let hasEmpty=false;
+  selectedVisa.fields.forEach(f=>{
+    const el=document.getElementById(f.id);
+    data[f.id]=el.value;
+    if(f.type==='date'&&!el.value)hasEmpty=true;
+  });
+  if(hasEmpty){toast('Please fill in all date fields','&#9888;&#65039;');return;}
+
+  timelineData=selectedVisa.deadlines(data)
+    .filter(item=>item.date instanceof Date&&!isNaN(item.date))
+    .sort((a,b)=>a.date-b.date);
+
+  // Stats
+  const critical=timelineData.filter(t=>t.priority==='critical').length;
+  const important=timelineData.filter(t=>t.priority==='important').length;
+  const routine=timelineData.filter(t=>t.priority==='routine').length;
+
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-card"><div class="stat-num red">${critical}</div><div class="stat-label">Critical</div></div>
+    <div class="stat-card"><div class="stat-num orange">${important}</div><div class="stat-label">Important</div></div>
+    <div class="stat-card"><div class="stat-num green">${routine}</div><div class="stat-label">Routine</div></div>
+  `;
+
+  document.getElementById('results-title').textContent=`${selectedVisa.name} Timeline`;
+  document.getElementById('results-subtitle').textContent=`${timelineData.length} deadlines based on your dates`;
+
+  const tl=document.getElementById('timeline');
+  tl.innerHTML=timelineData.map((item,i)=>{
+    const pc=item.priority==='critical'?'urgent':item.priority==='important'?'warning':'info';
+    const days=daysUntil(item.date);
+    let countdownText='';
+    if(days>0)countdownText=`${days} day${days!==1?'s':''} from now`;
+    else if(days===0)countdownText='Today';
+    else countdownText=`${Math.abs(days)} day${Math.abs(days)!==1?'s':''} ago`;
+    const countdownColor=days<=30&&days>=0?'var(--red)':days<=90&&days>=0?'var(--orange)':'var(--muted)';
+
+    return`<div class="tl-item ${pc}" style="animation:slideIn 0.4s cubic-bezier(0.16,1,0.3,1) ${i*0.06}s both">
+      <div class="tl-dot"></div>
+      <div class="tl-header">
+        <span class="tl-date">${fmt(item.date)}</span>
+        <span class="tl-tag ${item.priority}">${item.priority}</span>
+      </div>
+      <div class="tl-title">${item.title}</div>
+      <div class="tl-desc">${item.desc}</div>
+      <div class="tl-countdown" style="color:${countdownColor}">${days<=0&&days>-999?'&#9888;&#65039;':'&#128337;'} ${countdownText}</div>
+    </div>`;
+  }).join('');
+
+  goToStep(2);
+}
+
+// =========================================================
+// EXPORTS
+// =========================================================
+function exportICS(){
+  if(!timelineData.length)return;
+  let ics=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//VisaTimeline//EN\r\nCALSCALE:GREGORIAN\r\nMETHOD:PUBLISH\r\n`;
+  timelineData.forEach((item,i)=>{
+    const ds=fmtICS(item.date);
+    const uid=`vt-${selectedVisa.id}-${i}-${ds}@visatimeline.com`;
+    const summary=item.title.replace(/[,;\\]/g,'\\$&');
+    const description=item.desc.replace(/[,;\\]/g,'\\$&').replace(/\n/g,'\\n');
+    ics+=`BEGIN:VEVENT\r\nDTSTART;VALUE=DATE:${ds}\r\nDTEND;VALUE=DATE:${ds}\r\nSUMMARY:[VisaTimeline] ${summary}\r\nDESCRIPTION:${description}\\n\\nGenerated by VisaTimeline. General information only\\, not legal advice. Verify at USCIS.gov.\r\nUID:${uid}\r\nBEGIN:VALARM\r\nTRIGGER:-P7D\r\nACTION:DISPLAY\r\nDESCRIPTION:${summary} in 7 days\r\nEND:VALARM\r\nBEGIN:VALARM\r\nTRIGGER:-P30D\r\nACTION:DISPLAY\r\nDESCRIPTION:${summary} in 30 days\r\nEND:VALARM\r\nEND:VEVENT\r\n`;
+  });
+  ics+=`END:VCALENDAR\r\n`;
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`visatimeline-${selectedVisa.id}.ics`;a.click();
+  URL.revokeObjectURL(url);
+  toast('Calendar downloaded with 30-day and 7-day reminders!','&#128197;');
+}
+
+function exportGoogle(){
+  if(!timelineData.length)return;
+  const item=timelineData.find(t=>t.priority==='critical')||timelineData[0];
+  const ds=fmtICS(item.date);
+  const url=`https://calendar.google.com/calendar/r/eventedit?text=${encodeURIComponent('[VisaTimeline] '+item.title)}&dates=${ds}/${ds}&details=${encodeURIComponent(item.desc+'\n\nGenerated by VisaTimeline. General information only, not legal advice.')}`;
+  window.open(url,'_blank');
+  toast('For all events, download the .ics file','&#128161;');
+}
+
+function copyLink(){
+  const params=new URLSearchParams();
+  params.set('v',selectedVisa.id);
+  selectedVisa.fields.forEach(f=>{
+    const val=document.getElementById(f.id)?.value;
+    if(val)params.set(f.id,val);
+  });
+  const url=window.location.origin+window.location.pathname+'?'+params.toString();
+  navigator.clipboard.writeText(url).then(()=>{
+    toast('Link copied to clipboard!','&#128279;');
+  }).catch(()=>{
+    toast('Could not copy link','&#9888;&#65039;');
+  });
+}
+
+function signupReminder(){
+  const email=document.getElementById('reminder-email').value;
+  if(!email||!email.includes('@')){toast('Please enter a valid email','&#9888;&#65039;');return;}
+  // In production, this would POST to a backend
+  toast('Reminders set! We\'ll email you before each critical deadline.','&#9989;');
+  document.getElementById('reminder-email').value='';
+}
+
+// =========================================================
+// URL PARAMS (auto-fill if shared)
+// =========================================================
+function checkUrlParams(){
+  const params=new URLSearchParams(window.location.search);
+  const visaId=params.get('v');
+  if(visaId){
+    const visa=VISA_TYPES.find(v=>v.id===visaId);
+    if(visa){
+      selectedVisa=visa;
+      startFlow();
+      goToStep(1);
+      setTimeout(()=>{
+        visa.fields.forEach(f=>{
+          const val=params.get(f.id);
+          if(val){const el=document.getElementById(f.id);if(el)el.value=val;}
+        });
+      },100);
+    }
+  }
+}
+
+// =========================================================
+// LEGAL MODALS
+// =========================================================
+function showModal(title,content){
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.onclick=(e)=>{if(e.target===overlay)overlay.remove()};
+  overlay.innerHTML=`<div class="modal"><h2>${title}</h2>${content}<button class="btn btn-secondary" style="margin-top:20px" onclick="this.closest('.modal-overlay').remove()">Close</button></div>`;
+  document.body.appendChild(overlay);
+}
+
+function showDisclaimer(){
+  showModal('Disclaimer',`
+    <p><strong>VisaTimeline is an informational tool only.</strong></p>
+    <p>The information provided by VisaTimeline is based on publicly available U.S. Citizenship and Immigration Services (USCIS) guidelines and general immigration timelines. This information is provided for general organizational purposes only.</p>
+    <p><strong>VisaTimeline does not provide legal advice.</strong> Use of this tool does not create an attorney-client relationship. The deadlines generated are estimates based on the dates you provide and general USCIS guidelines, which may change at any time.</p>
+    <p><strong>You should not rely solely on this tool</strong> for immigration compliance. Always verify deadlines directly with USCIS at <a href="https://www.uscis.gov">uscis.gov</a>, your Designated School Official (DSO), or a licensed immigration attorney.</p>
+    <p>VisaTimeline does not select or prepare immigration forms, does not advise on visa category selection, does not advise how to answer questions on immigration forms, and does not make representations about the outcome of any immigration process.</p>
+    <p>VisaTimeline, its creators, and affiliates are not liable for any consequences resulting from use of or reliance on information provided by this tool, including missed deadlines, denied applications, or immigration enforcement actions.</p>
+    <p><strong>If you need legal advice, please consult a licensed immigration attorney</strong> or a DOJ-accredited representative.</p>
+  `);
+}
+
+function showPrivacy(){
+  showModal('Privacy Policy',`
+    <p><strong>Last updated: April 2026</strong></p>
+    <p><strong>Data we collect:</strong> None. All calculations happen entirely in your browser. Your visa type selections and dates are never sent to any server, stored in any database, or shared with any third party.</p>
+    <p><strong>No accounts required.</strong> You do not need to create an account or provide personal information to use VisaTimeline.</p>
+    <p><strong>Calendar exports:</strong> .ics files and Google Calendar links are generated in your browser and sent directly to your calendar app. VisaTimeline does not intermediate or store this data.</p>
+    <p><strong>Email reminders:</strong> If you opt in to email reminders, your email address and deadline dates are stored solely for the purpose of sending reminders. We never share this data with third parties.</p>
+    <p><strong>Analytics:</strong> We may use privacy-respecting analytics (page view counts) that do not track individual users.</p>
+    <p><strong>No cookies or tracking:</strong> VisaTimeline does not use cookies, local storage, or fingerprinting.</p>
+  `);
+}
+
+function showTerms(){
+  showModal('Terms of Service',`
+    <p><strong>Last updated: April 2026</strong></p>
+    <p><strong>1. Informational Purpose Only.</strong> VisaTimeline provides general immigration deadline information based on publicly available USCIS guidelines. It is not a legal service.</p>
+    <p><strong>2. No Attorney-Client Relationship.</strong> Use of VisaTimeline does not create an attorney-client relationship.</p>
+    <p><strong>3. No Guarantee of Accuracy.</strong> Immigration rules change frequently. Deadlines are estimates. You are solely responsible for verifying all deadlines with official sources.</p>
+    <p><strong>4. Limitation of Liability.</strong> VisaTimeline shall not be liable for any damages, losses, or adverse immigration consequences arising from use of this tool.</p>
+    <p><strong>5. User Responsibility.</strong> You acknowledge that immigration law is complex and you should consult a licensed attorney for individual guidance.</p>
+    <p><strong>6. Modifications.</strong> We may update these terms at any time. Continued use constitutes acceptance.</p>
+    <p><strong>7. Governing Law.</strong> These terms are governed by the laws of the State of Washington.</p>
+  `);
+}
+
+// =========================================================
+// INIT
+// =========================================================
+renderVisaGrid();
+checkUrlParams();
+</script>
+</body>
+</html>
